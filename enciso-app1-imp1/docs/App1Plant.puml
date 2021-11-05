@@ -1,0 +1,59 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+class ToDoListApplication {
+    main()
+    start()
+}
+
+class ListController {
+    listDisplay : TextField
+    - todo: ArrayList<List>
+
+    +selectListButtonClicked()
+    +selectList()
+    +addListButtonClicked()
+    +addList()
+    +removeListButtonClicked()
+    +removeList()
+    +addItemButtonClicked()
+    +addItem()
+    +saveButtonClicked()
+    +saveAll()
+    +saveList()
+    +loadButtonClicked()
+    +loadList()
+    +removeItemButtonClicked()
+    +removeItem()
+    +editItemButtonClicked()
+    +editItem()
+    +editDateButtonClciked()
+    +editDate()
+    +markCompleteButtonClicked()
+    +markComplete()
+    +filterStatusButton()
+    +printList()
+    +completeList()
+    +incompleteList()
+
+}
+
+
+class ListItem {
+    -String itemName
+    -String date
+    -String status
+    +getItem()
+    +setItem()
+    +getDate()
+    +setDate()
+    +getStatus()
+    +setStatus()
+}
+
+javafx.Application <|-- ListManager
+ListManager - ListController
+
+
+
+@enduml
