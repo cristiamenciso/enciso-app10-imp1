@@ -1,39 +1,117 @@
 package baseline;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.ComboBoxListCell;
+import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.control.cell.TextFieldTableCell;
 
-public class ListController  {
+import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+public class ListController implements Initializable {
 
     @FXML
-    ListView<String> list = new ListView<>();
+    private TableView<ListItem> table = new TableView<>();
 
+    @FXML
+    private TableColumn<ListItem, String> listName;
+
+    @FXML
+    private TableColumn<ListItem, String> date = new TableColumn<>();
+
+    @FXML
+    private TableColumn<ListItem, String> status = new TableColumn<>();
+
+
+    @FXML
+    private TextField nameField;
+
+    @FXML
+    private DatePicker dateField;
+
+
+    private ObservableList<ListItem> obList = FXCollections.observableArrayList();
+
+    private ListItem selectedItem;
+
+    @FXML
+    private ComboBox<String> filterBox = new ComboBox<>();
+    ObservableList<String> filterList = FXCollections.observableArrayList("Show All", "Show Complete", "Show Incomplete");
+
+    @Override
+    public void initialize(URL location, ResourceBundle resource) {
+        listName.setCellValueFactory(cellData -> cellData.getValue().itemNameProperty());
+        listName.setCellFactory(TextFieldTableCell.forTableColumn());
+        date.setCellValueFactory(cellData -> cellData.getValue().dateProperty());
+        date.setCellFactory(TextFieldTableCell.forTableColumn());
+        status.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
+        status.setCellFactory(ComboBoxTableCell.forTableColumn("Complete", "Incomplete"));
+        table.setItems(obList);
+        filterBox.setItems(filterList);
+
+    }
 
     @FXML
     public void addItemButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        //prompt user to select a list
-        // call select list method
-        // prompt user for name of item
-        // Call addItem method
-    }
+        ListItem emptyItem = new ListItem();
+        if(dateField.getValue() == null) {
+            dateField.getValue();
+            ListItem fullList = addItem(nameField.getText(), emptyItem);
+            obList.add(fullList);
+            nameField.clear();
 
-    public void addItem(String itemName, Object list) {
-        // create list object instance
-        // create new item object
-        // add method to add item object to item arrayList in List object.
+        }
+        else {
+            ListItem fullList = addItem(nameField.getText(), dateField.getValue(), emptyItem);
+            obList.add(fullList);
+            nameField.clear();
+            dateField.getEditor().clear();
+            dateField.setValue(null);
+        }
+
+    }
+    @FXML
+    private ListItem addItem(String itemName, LocalDate date, ListItem item) {
+        item.setItem(itemName);
+        item.setDate(date.toString());
+        return item;
+    }
+    private ListItem addItem(String itemName, ListItem item) {
+        item.setItem(itemName);
+        return item;
     }
 
     @FXML
-    public void saveButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        // prompt user to save a single list or all of them
-        // if single list
+    public void saveButtonClicked(javafx.scene.input.MouseEvent mouseEvent) throws IOException {
         // call saveList method
+        saveList(obList);
 
     }
 
-    public void saveList() {
+    private void saveList(ObservableList<ListItem> list) throws IOException {
         // make a new text file
-        // write into text file
+        File saveFile = new File("data/list.txt");
+        try (FileWriter write = new FileWriter(saveFile)) {
+            // write into text file
+            for(ListItem item : list) {
+                write.write(item.getItem() + "\t" + item.getDate() + "\t" + item.getStatus() + "\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
     @FXML
@@ -51,73 +129,70 @@ public class ListController  {
 
     @FXML
     public void removeItemButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        // Prompt user to select list
-        // call selectList method
-        // Prompt user to select an item
-        // call removeItem method
+        removeItem(obList, selectedItem);
+
+
     }
-    public void removeItem(Object list, String itemName) {
+    public void removeItem(ObservableList<ListItem> list, ListItem item) {
         // remove method to remove item object from the item arraylist in list object
-    }
+        list.remove(item);
 
-    @FXML
-    public void editItemButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        // Prompt user to select list
-        // Call selectList method
-        // Prompt user to select item
-        // Prompt user for edit
-        // Call editItem method
-
-    }
-    public void editItem(Object list, String itemName, String edit) {
-        // make a new item instance
-        // setItem method to set new item name
-    }
-
-    @FXML
-    public void editDateButtonClciked(javafx.scene.input.MouseEvent mouseEvent) {
-        // Prompt user to select list
-        // Call selectList method
-        // Prompt user to select item
-        // Prompt user for date edit
-        // Call editDate method
-    }
-    public void editDate(Object list, String itemName, String editDate) {
-        // make a new item instance
-        // setDate method to set new item date
-    }
-
-    @FXML
-    public void markCompleteButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        // Call markComplete method
-    }
-    public void markComplete(Object list, String itemName) {
-        // create a new item instance
-        // setStatus method to set status to "Complete"
 
     }
     @FXML
-    public void markIncompleteButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
-        // Call markIncomplete method
-    }
-
-    public void markIncomplete(Object list, String itemName) {
-        // create a new item instance
-        // set status to incomplete
+    private void getSelected(javafx.scene.input.MouseEvent mouseEvent) {
+        selectedItem = table.getSelectionModel().getSelectedItem();
     }
 
     @FXML
-    public void filterStatusButton(javafx.scene.input.MouseEvent mouseEvent) {
-        // if show all selected
-        // Call printList method
-        // if show complete selected
-        // call completeList method
-        // if show incomplete selected
-        // call incompleteList method
+    public void removeAllButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
+        removeAll(obList);
+
     }
-    public void printList(Object selectList) {
+    public void removeAll(ObservableList<ListItem> list) {
+        list.clear();
+    }
+
+
+
+
+    private void filter(String comboState) {
+        if(comboState.equals("Show Incomplete")) {
+            List<ListItem> tempList;
+            ObservableList<ListItem> temp;
+            temp = copyList(obList);
+            tempList = temp.stream().filter(t -> t.getStatus().equals("Incomplete")).toList();
+            obList = FXCollections.observableArrayList(tempList);
+
+        }
+        else if(comboState.equals("Show Complete")) {
+            List<ListItem> tempList;
+            ObservableList<ListItem> temp;
+            temp = copyList(obList);
+            tempList = temp.stream().filter(t -> t.getStatus().equals("Complete")).toList();
+            obList = FXCollections.observableArrayList(tempList);
+        }
+
+    }
+
+    @FXML
+    public void comboBoxChange(javafx.event.ActionEvent actionEvent) {
+        filter(filterBox.getValue());
+    }
+
+    private ObservableList<ListItem> copyList(ObservableList<ListItem> source) {
+
+        return  FXCollections.observableArrayList(source);
+
+
+    }
+    public void printList(ObservableList<ListItem> list) {
+        // only prints if list is not empty
         // loop through items in list object
         // print out the items
+        for(ListItem item : list) {
+            System.out.print(item.getItem());
+        }
 
     }
     public void completeList(Object selectList) {
@@ -130,6 +205,5 @@ public class ListController  {
         // use getStatus method to see status of items
         // print out items marked as incomplete
     }
-
 
 }
