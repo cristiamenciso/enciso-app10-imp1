@@ -1,26 +1,29 @@
 package baseline;
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 1 Solution
+ *  Copyright 2021 Cristiam Enciso
+ */
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.ComboBoxListCell;
 import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.FileChooser;
 
-import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 public class ListController implements Initializable {
 
+    // Variables for the GUI
     @FXML
     private TableView<ListItem> table = new TableView<>();
 
@@ -33,22 +36,26 @@ public class ListController implements Initializable {
     @FXML
     private TableColumn<ListItem, String> status = new TableColumn<>();
 
-
     @FXML
     private TextField nameField;
 
     @FXML
     private DatePicker dateField;
 
-
     private ObservableList<ListItem> obList = FXCollections.observableArrayList();
 
     private ListItem selectedItem;
 
+
+
     @FXML
     private ComboBox<String> filterBox = new ComboBox<>();
     ObservableList<String> filterList = FXCollections.observableArrayList("Show All", "Show Complete", "Show Incomplete");
+    FilteredList<ListItem> newList = new FilteredList<>(obList);
 
+    FileChooser fileChooser = new FileChooser();
+
+    // Method to inititalize GUI variables, elemetns and proeperties
     @Override
     public void initialize(URL location, ResourceBundle resource) {
         listName.setCellValueFactory(cellData -> cellData.getValue().itemNameProperty());
@@ -57,23 +64,38 @@ public class ListController implements Initializable {
         date.setCellFactory(TextFieldTableCell.forTableColumn());
         status.setCellValueFactory(cellData -> cellData.getValue().statusProperty());
         status.setCellFactory(ComboBoxTableCell.forTableColumn("Complete", "Incomplete"));
-        table.setItems(obList);
         filterBox.setItems(filterList);
+        table.setItems(obList);
+        fileChooser.setInitialDirectory(new File("C:\\temp"));
 
+
+        // Attempt to create a listener for combobox to filter list
+        FilteredList<ListItem> filteredData = new FilteredList<>(obList, p -> true);
+        filterBox.onActionProperty().addListener((observable, oldValue, newValue) -> filteredData.setPredicate(listItem -> {
+            if(newValue.toString().equals("Show All")) {
+                return true;
+            }
+            if(newValue.toString().equals("Show Complete")) {
+                return true;
+            }
+            return newValue.toString().equals("Show Incomplete");
+        }));
     }
 
+
+    // Private Methods and events
     @FXML
     public void addItemButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
         ListItem emptyItem = new ListItem();
         if(dateField.getValue() == null) {
             dateField.getValue();
-            ListItem fullList = addItem(nameField.getText(), emptyItem);
+            ListItem fullList = makeItem(nameField.getText(), emptyItem);
             obList.add(fullList);
             nameField.clear();
 
         }
         else {
-            ListItem fullList = addItem(nameField.getText(), dateField.getValue(), emptyItem);
+            ListItem fullList = makeItem(nameField.getText(), dateField.getValue(), emptyItem);
             obList.add(fullList);
             nameField.clear();
             dateField.getEditor().clear();
@@ -81,13 +103,14 @@ public class ListController implements Initializable {
         }
 
     }
-    @FXML
-    private ListItem addItem(String itemName, LocalDate date, ListItem item) {
+
+
+    private ListItem makeItem(String itemName, LocalDate date, ListItem item) {
         item.setItem(itemName);
         item.setDate(date.toString());
         return item;
     }
-    private ListItem addItem(String itemName, ListItem item) {
+    private ListItem makeItem(String itemName, ListItem item) {
         item.setItem(itemName);
         return item;
     }
@@ -97,8 +120,27 @@ public class ListController implements Initializable {
         // call saveList method
         saveList(obList);
 
-    }
 
+       /* Window stage = menu.getScene().getWindow();
+        fileChooser.setTitle("Save Log");
+        fileChooser.setInitialFileName("mysave");
+        fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("text file", "*.txt"));
+        fileChooser.showSaveDialog(stage);
+
+        try {
+            File file = fileChooser.showSaveDialog(stage);
+            fileChooser.setInitialDirectory(file.getParentFile());
+        }
+        catch (Exception ignored) {
+
+        }
+
+        */
+
+
+
+    }
+    // method to write into a file
     private void saveList(ObservableList<ListItem> list) throws IOException {
         // make a new text file
         File saveFile = new File("data/list.txt");
@@ -112,8 +154,12 @@ public class ListController implements Initializable {
         }
 
 
+
+
     }
 
+
+    // Could not get this load feature to work
     @FXML
     public void loadButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
         // prompt user for the name of the file
@@ -126,19 +172,21 @@ public class ListController implements Initializable {
         // get contents of file and store in an array
         // format into list
     }
-
+    // methos to remove item from list
     @FXML
     public void removeItemButtonClicked(javafx.scene.input.MouseEvent mouseEvent) {
         removeItem(obList, selectedItem);
 
 
     }
-    public void removeItem(ObservableList<ListItem> list, ListItem item) {
+    private void removeItem(ObservableList<ListItem> list, ListItem item) {
         // remove method to remove item object from the item arraylist in list object
         list.remove(item);
 
 
     }
+
+    // method to select item from the gui
     @FXML
     private void getSelected(javafx.scene.input.MouseEvent mouseEvent) {
         selectedItem = table.getSelectionModel().getSelectedItem();
@@ -149,61 +197,15 @@ public class ListController implements Initializable {
         removeAll(obList);
 
     }
-    public void removeAll(ObservableList<ListItem> list) {
+    private void removeAll(ObservableList<ListItem> list) {
         list.clear();
     }
 
-
-
-
-    private void filter(String comboState) {
-        if(comboState.equals("Show Incomplete")) {
-            List<ListItem> tempList;
-            ObservableList<ListItem> temp;
-            temp = copyList(obList);
-            tempList = temp.stream().filter(t -> t.getStatus().equals("Incomplete")).toList();
-            obList = FXCollections.observableArrayList(tempList);
-
-        }
-        else if(comboState.equals("Show Complete")) {
-            List<ListItem> tempList;
-            ObservableList<ListItem> temp;
-            temp = copyList(obList);
-            tempList = temp.stream().filter(t -> t.getStatus().equals("Complete")).toList();
-            obList = FXCollections.observableArrayList(tempList);
-        }
-
-    }
-
+     // method to observe the changing of the combobox
     @FXML
     public void comboBoxChange(javafx.event.ActionEvent actionEvent) {
-        filter(filterBox.getValue());
-    }
+        //filter(filterBox.getValue());
 
-    private ObservableList<ListItem> copyList(ObservableList<ListItem> source) {
-
-        return  FXCollections.observableArrayList(source);
-
-
-    }
-    public void printList(ObservableList<ListItem> list) {
-        // only prints if list is not empty
-        // loop through items in list object
-        // print out the items
-        for(ListItem item : list) {
-            System.out.print(item.getItem());
-        }
-
-    }
-    public void completeList(Object selectList) {
-        // loop through items in list object
-        // use getStatus method to see status of items
-        // print out items marked as complete
-    }
-    public void incompleteList(Object selectList) {
-        // loop through items in list object
-        // use getStatus method to see status of items
-        // print out items marked as incomplete
     }
 
 }

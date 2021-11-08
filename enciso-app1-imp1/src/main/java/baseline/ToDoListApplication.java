@@ -1,4 +1,8 @@
 package baseline;
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 1 Solution
+ *  Copyright 2021 Cristiam Enciso
+ */
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -24,7 +28,7 @@ public class ToDoListApplication extends Application {
             Scene scene = new Scene(root);
 
             primaryStage.setScene(scene);
-            primaryStage.setTitle("ListManager");
+            primaryStage.setTitle("To-Do List");
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();

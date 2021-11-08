@@ -7,42 +7,32 @@ class ToDoListApplication {
 }
 
 class ListController {
-    listDisplay : TextField
-    - todo: ArrayList<List>
+    -TableView table
+    -TableColumn listName
+    -TableColumn date
+    -TableColumn status
+    -TextField nameField
+    -removeListButtonClicked()
+    -removeList()
+    -addItemButtonClicked()
+    -addItem()
+    -saveButtonClicked()
+    -saveList()
+    -loadButtonClicked()
+    -loadList()
+    -removeItemButtonClicked()
+    -removeItem()
+    -filterStatusButton()
 
-    +selectListButtonClicked()
-    +selectList()
-    +addListButtonClicked()
-    +addList()
-    +removeListButtonClicked()
-    +removeList()
-    +addItemButtonClicked()
-    +addItem()
-    +saveButtonClicked()
-    +saveAll()
-    +saveList()
-    +loadButtonClicked()
-    +loadList()
-    +removeItemButtonClicked()
-    +removeItem()
-    +editItemButtonClicked()
-    +editItem()
-    +editDateButtonClciked()
-    +editDate()
-    +markCompleteButtonClicked()
-    +markComplete()
-    +filterStatusButton()
-    +printList()
-    +completeList()
-    +incompleteList()
 
 }
 
 
 class ListItem {
-    -String itemName
-    -String date
-    -String status
+    -SimpleStringProperty itemName
+    -SimpleStringProperty date
+    -SimpleStringProperty status
+    +ListItem()
     +getItem()
     +setItem()
     +getDate()
@@ -51,8 +41,9 @@ class ListItem {
     +setStatus()
 }
 
-javafx.Application <|-- ListManager
-ListManager - ListController
+javafx.Application <|-- ToDoListApplication
+ToDoListApplication - ListController
+javafx.Initializable  <---- listController
 
 
 

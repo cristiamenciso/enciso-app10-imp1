@@ -1,4 +1,8 @@
 package baseline;
+/*
+ *  UCF COP3330 Fall 2021 Application Assignment 1 Solution
+ *  Copyright 2021 Cristiam Enciso
+ */
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +49,7 @@ class ListItemTest {
     void getStatus() {
         ListItem test = new ListItem();
         String actual = test.getStatus();
-        String expected = null;
+        String expected = "Incomplete";
         assertEquals(expected, actual);
     }
 
